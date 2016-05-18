@@ -23,22 +23,24 @@
 (defn CheckPrimeCore [seedPrimes nn]
   {:pre [(> (count seedPrimes) 0)
          (number? nn)
-         (> nn 1)]}
+         (> nn 0)]}
 
-  (let [divLim (Math/Ceiling (Math/Sqrt nn))
-        lesserPrimes (filter (fn [yy] (< yy nn)) seedPrimes)
-        factorSoFar (if (or (zero? (count lesserPrimes)) (nil? lesserPrimes)) false
-                        (reduce (fn [aa bb] (or aa bb))
-                                (map (fn [xx] (DivisibleBy nn xx))
-                                     lesserPrimes)))]
-
-    (if factorSoFar false
-        (let [lsp (last seedPrimes)]
-          (loop [ii (if (= lsp 2) 3 (+ lsp 2))]
-            (if (> ii divLim) true
-                (if (DivisibleBy nn ii)
-                  false
-                  (recur (+ ii 2)))))))))
+  (if (= nn 1)
+    false
+    (let [divLim (Math/Ceiling (Math/Sqrt nn))
+          lesserPrimes (filter (fn [yy] (< yy nn)) seedPrimes)
+          factorSoFar (if (or (zero? (count lesserPrimes)) (nil? lesserPrimes)) false
+                          (reduce (fn [aa bb] (or aa bb))
+                                  (map (fn [xx] (DivisibleBy nn xx))
+                                       lesserPrimes)))]
+      
+      (if factorSoFar false
+          (let [lsp (last seedPrimes)]
+            (loop [ii (if (= lsp 2) 3 (+ lsp 2))]
+              (if (> ii divLim) true
+                  (if (DivisibleBy nn ii)
+                    false
+                    (recur (+ ii 2))))))))))
 
 
 (defn CheckPrime [nn]
@@ -56,6 +58,10 @@
         (let [isPrime (CheckPrimeCore primes jj)]
           (recur (+ jj 2) (if isPrime (conj primes jj) primes)))))))
 
+(defn PrimesUptoN [limit]
+  (ExtendPrimes SeedPrimes limit))
+
+
 (defn GetFactors [nn]
   "Returns a sorted set of all of the factors of nn between 1 and nn exclusive"
   (let [divLim (Math/Ceiling (Math/Sqrt nn))]
@@ -71,7 +77,26 @@
   (let [factors (GetFactors nn)
         divLim (Math/Ceiling (Math/Sqrt nn))
         primes (ExtendPrimes (sorted-set 2 3 5 7 11) divLim)]
+
+    ;; (println "Factors = " factors "divLim " divLim " primes " primes)
     (filter (fn [xx] (CheckPrimeCore primes xx)) factors)))
+
+
+(defn HowManyTimes [nn factor]
+  (loop [ii nn cnt 0]
+    (if (not (zero? (mod ii factor)))
+      cnt
+      (recur (/ ii factor) (inc cnt)))))
+
+(defn PrimeFactorization [nn]
+  "Return Prime Factorization of NN in a hash table"
+  (let [pf (PrimeFactors nn) acc {} ]
+
+    ;;(println "pf = " pf)
+    (map (fn [xx] (list xx (HowManyTimes nn xx))) pf)))
+
+
+
 
 
 (defn RunTests []

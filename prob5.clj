@@ -2,12 +2,21 @@
 ;;
 ;;What is the smallest positive number that is evenly divisible by all of the numbers from 1 to 20?
 
-
 (require 'Factors)
 
 
+(defn DivTimes [nn ii]
+  "returns the number of times that ii divides nn"
+  (loop [cnt 0 left nn]
+    (if (or (zero? left) (= left 1) (not (zero? (mod left ii))))
+      cnt
+      (recur (inc cnt) (/ left ii)))))
 
-;;
-;; First let's try to get 1-10
-;;
-(def pf10 (Factors/PrimeFactors (reduce * (range 1 11))))
+(doseq [pp (Factors/PrimesUptoN 20)]
+  (let [xlist (map (fn [xx] (DivTimes xx pp) (range 2 21)))]
+    (println pp)))
+
+
+
+
+
