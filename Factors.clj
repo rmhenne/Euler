@@ -98,7 +98,7 @@
 
 ;;
 ;;
-;; This set of fucntions implements a generative Sieve of Eratosthenes algorithm
+;; This set of fucntions implements a generative Sieve of Eratosthenes algorithm.  In this implementation, we will simply skip multiples of 2
 ;;
 ;; A hash table is used to hold lists of multiples of primes
 ;;
@@ -107,15 +107,27 @@
 ;;
 ;;
 
-(defn Expand [hh kk]
-  ;;  {pre: [(contains? hh kk)] }
-  (loop [vv (let [xx (get hh kk)] (if (list? xx) xx (list xx)))
-         newHash (dissoc hh kk)
+
+(defn Insert [nonPrimeHash kk vv]
+  "Insert a multiple (kk) prime (vv) pair into the hash.  If kk is already there, append vv to list of primes.  If kk is not there, add it in a list associated with kk."
+  (if (contains? nonPrimeHash kk)
+    (assoc nonPrimeHash kk (conj (get nonPrimeHash kk) vv))
+    (assoc nonPrimeHash kk (list vv))))
+
+
+
+
+
+  
+(defn Expand [nonPrimeHash kk]
+  ;;  {pre: [(contains? nonPrimeHash kk)] }
+  (loop [vv (let [xx (get nonPrimeHash kk)] (if (list? xx) xx (list xx)))
+         newHash (dissoc nonPrimeHash kk)
          ii (first vv)]
     (if (zero? (count vv))
       newHash
       (let [rv (rest vv)]
-        (recur rv (assoc hh (+ kk ii) ii) (if (zero? (count rv)) 0 (first rv)))))))
+        (recur rv (assoc nonPrimeHash (+ kk ii) ii) (if (zero? (count rv)) 0 (first rv)))))))
               
     
   
@@ -123,10 +135,10 @@
 
 (defn GenPrimes []
   (println 2)
-  (loop [xx 3 primeHash { } ]
-    (if (not (contains? primeHash xx))
+  (loop [xx 3 nonPrimeHash { } ]
+    (if (not (contains? nonPrimeHash xx))
       (println xx)
-      (recur (+ 2 xx) (assoc primeHash (* xx xx) xx)))))
+      (recur (+ 2 xx) (assoc nonPrimeHash (* xx xx) xx)))))
 
       
       
