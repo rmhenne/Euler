@@ -96,8 +96,19 @@
     (map (fn [xx] (list xx (HowManyTimes nn xx))) pf)))
 
 
+;;
+;;
+;; This set of fucntions implements a generative Sieve of Eratosthenes algorithm
+;;
+;; A hash table is used to hold lists of multiples of primes
+;;
+;; For instance at some point 3 will be identified as a prime.  We need to "mark off" all multiples of 3.  Turns out we only need to watch out for 3^2.  So we will insert { 9: 3 } into the hash.
+;; if we need to check 9 for primality, we look up in the hash, see 9, reject 9 as a prime and insert { 12:3 } into the hash because 12 is the next multiple of 3.
+;;
+;;
+
 (defn Expand [hh kk]
-;;  {pre: [(contains? hh kk)] }
+  ;;  {pre: [(contains? hh kk)] }
   (loop [vv (let [xx (get hh kk)] (if (list? xx) xx (list xx)))
          newHash (dissoc hh kk)
          ii (first vv)]
