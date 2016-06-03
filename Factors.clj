@@ -96,6 +96,31 @@
     (map (fn [xx] (list xx (HowManyTimes nn xx))) pf)))
 
 
+(defn Expand [hh kk]
+;;  {pre: [(contains? hh kk)] }
+  (loop [vv (let [xx (get hh kk)] (if (list? xx) xx (list xx)))
+         newHash (dissoc hh kk)
+         ii (first vv)]
+    (if (zero? (count vv))
+      newHash
+      (let [rv (rest vv)]
+        (recur rv (assoc hh (+ kk ii) ii) (if (zero? (count rv)) 0 (first rv)))))))
+              
+    
+  
+
+
+(defn GenPrimes []
+  (println 2)
+  (loop [xx 3 primeHash { } ]
+    (if (not (contains? primeHash xx))
+      (println xx)
+      (recur (+ 2 xx) (assoc primeHash (* xx xx) xx)))))
+
+      
+      
+      
+
 
 
 
