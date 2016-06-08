@@ -127,15 +127,15 @@
 
 
 (defn GenPrimes [countMax]
-  (println 2)
-  (loop [xx 3 nonPrimeHash { } cnt 1]
+  (loop [xx 2 nonPrimeHash { } cnt 1]
     (if (< cnt countMax)
       (if (not (contains? nonPrimeHash xx))
         (do
           (println xx)
-          (recur (+ 2 xx) (assoc nonPrimeHash (* xx xx) xx) (inc cnt)))
-        (recur (+ 2 xx) nonPrimeHash cnt)))))
-
+          (assert (CheckPrime xx))
+          (println nonPrimeHash)
+          (recur (inc xx) (assoc nonPrimeHash (* xx xx) xx) (inc cnt)))
+        (recur (inc xx) (Expand nonPrimeHash xx) cnt)))))
 
       
       
