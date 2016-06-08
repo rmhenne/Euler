@@ -107,20 +107,13 @@
 ;;
 ;;
 
-
 (defn Insert [nonPrimeHash kk vv]
-  "Insert a multiple (kk) prime (vv) pair into the hash.  If kk is already there, append vv to list of primes.  If kk is not there, add it in a list associated with kk."
-  (if (contains? nonPrimeHash kk)
-    (assoc nonPrimeHash kk (conj (get nonPrimeHash kk) vv))
-    (assoc nonPrimeHash kk (list vv))))
+  { :pre [ (not (contains? nonPrimeHash kk)) ] }
+  "Insert a multiple (kk) prime (vv) pair into the hash. Assumes K is not already there since we are skipping evens."
+  (assoc nonPrimeHash kk (list vv)))
 
-
-
-
-
-  
 (defn Expand [nonPrimeHash kk]
-  ;;  {pre: [(contains? nonPrimeHash kk)] }
+  { :pre [(contains? nonPrimeHash kk)] }
   (loop [vv (let [xx (get nonPrimeHash kk)] (if (list? xx) xx (list xx)))
          newHash (dissoc nonPrimeHash kk)
          ii (first vv)]
@@ -133,14 +126,17 @@
   
 
 
-(defn GenPrimes []
+(defn GenPrimes [countMax]
   (println 2)
-  (loop [xx 3 nonPrimeHash { } ]
-    (if (not (contains? nonPrimeHash xx))
-      (println xx)
-      (recur (+ 2 xx) (assoc nonPrimeHash (* xx xx) xx)))))
+  (loop [xx 3 nonPrimeHash { } cnt 1]
+    (if (< cnt countMax)
+      (if (not (contains? nonPrimeHash xx))
+        (do
+          (println xx)
+          (recur (+ 2 xx) (assoc nonPrimeHash (* xx xx) xx) (inc cnt)))
+        (recur (+ 2 xx) nonPrimeHash cnt)))))
 
-      
+
       
       
 
