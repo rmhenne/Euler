@@ -108,19 +108,37 @@
 ;;
 
 (defn Insert [nonPrimeHash kk vv]
-  { :pre [ (not (contains? nonPrimeHash kk)) ] }
-  "Insert a multiple (kk) prime (vv) pair into the hash. Assumes K is not already there since we are skipping evens."
-  (assoc nonPrimeHash kk (list vv)))
+  "Insert a multiple (kk) prime (vv) pair into the hash."
+  (if (contains? nonPrimeHash kk)
+    (assoc nonPrimeHash kk (conj (get nonPrimeHash kk) vv))
+    (assoc nonPrimeHash kk (list vv))
+    )
+  )
+
 
 (defn Expand [nonPrimeHash kk]
   { :pre [(contains? nonPrimeHash kk)] }
-  (loop [vv (let [xx (get nonPrimeHash kk)] (if (list? xx) xx (list xx)))
+  ;;(println "Expand (" kk ")")
+  (loop [vv (get nonPrimeHash kk)
          newHash (dissoc nonPrimeHash kk)
          ii (first vv)]
-    (if (zero? (count vv))
-      newHash
-      (let [rv (rest vv)]
-        (recur rv (assoc nonPrimeHash (+ kk ii) ii) (if (zero? (count rv)) 0 (first rv)))))))
+
+    (assert (not (empty? vv)))
+
+    (let [rv (rest vv)
+          nh (Insert newHash (+ kk ii) ii)]
+      ;;(println "\trv = " rv " nh = " nh )
+      
+      (if (empty? rv)
+        nh
+        (do
+          ;;(println "\trecur " rv " " nh " " (first rv))
+          (recur rv nh (first rv))
+          )
+        )
+      )
+    )
+  )
               
     
   
@@ -128,14 +146,22 @@
 
 (defn GenPrimes [countMax]
   (loop [xx 2 nonPrimeHash { } cnt 1]
-    (if (< cnt countMax)
-      (if (not (contains? nonPrimeHash xx))
-        (do
-          (println xx)
-          (assert (CheckPrime xx))
-          (println nonPrimeHash)
-          (recur (inc xx) (assoc nonPrimeHash (* xx xx) xx) (inc cnt)))
-        (recur (inc xx) (Expand nonPrimeHash xx) cnt)))))
+    (if (<= cnt countMax)
+      (do 
+        ;;        (println "Check " xx " with hash of " nonPrimeHash)
+
+        (if (not (contains? nonPrimeHash xx))
+          (do
+            (println xx)
+            (assert (CheckPrime xx))
+            (recur (inc xx) (Insert nonPrimeHash (* xx xx) xx) (inc cnt))
+            )
+          (recur (inc xx) (Expand nonPrimeHash xx) cnt))
+        )
+
+      )
+    ) 
+  ) 
 
       
       
@@ -162,3 +188,4 @@
     )
   )
     
+(Factors/GenPrimes 10001)
