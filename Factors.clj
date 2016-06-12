@@ -144,30 +144,30 @@
   
 
 
+(defn GenPrimeCore [ firstCandidate nonPrimeHash ]
+  (loop [xx firstCandidate nph nonPrimeHash]
+    (if (not (contains? nph xx))
+      (list xx (Insert nph (* xx xx) xx))
+      (recur (inc xx) (Expand nph xx))
+      )
+    )
+  )
+  
+
+
 (defn GenPrimes [countMax]
   (loop [xx 2 nonPrimeHash { } cnt 1]
     (if (<= cnt countMax)
-      (do 
-        ;;        (println "Check " xx " with hash of " nonPrimeHash)
-
-        (if (not (contains? nonPrimeHash xx))
-          (do
-            (println xx)
-            (assert (CheckPrime xx))
-            (recur (inc xx) (Insert nonPrimeHash (* xx xx) xx) (inc cnt))
-            )
-          (recur (inc xx) (Expand nonPrimeHash xx) cnt))
+      (let [rList (GenPrimeCore xx nonPrimeHash)
+            vv (first rList)
+            nph (second rList)]
+        (println vv)
+        (assert CheckPrime vv)
+        (recur (inc vv) nph (inc cnt))
         )
-
       )
-    ) 
-  ) 
-
-      
-      
-
-
-
+    )
+  )
 
 (defn RunTests []
   (let [retVal true]
