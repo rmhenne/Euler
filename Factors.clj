@@ -110,64 +110,56 @@
 (defn Insert [nonPrimeHash kk vv]
   "Insert a multiple (kk) prime (vv) pair into the hash."
   (if (contains? nonPrimeHash kk)
-    (assoc nonPrimeHash kk (conj (get nonPrimeHash kk) vv))
-    (assoc nonPrimeHash kk (list vv))
+    (assoc nonPrimeHash kk (conj (get nonPrimeHash kk) vv))  ;; Another prime factor of kk. Map kk -> (vv previousFactors)
+    (assoc nonPrimeHash kk (list vv)) ;; first prime factor of kk. Map kk -> (vv)
     )
   )
 
 
 (defn Expand [nonPrimeHash kk]
-  { :pre [(contains? nonPrimeHash kk)] }
-  ;;(println "Expand (" kk ")")
+  { :pre [(contains? nonPrimeHash kk)              ;; If we are going to expand it, it better be in the hash
+          (not (empty? (get nonPrimeHash kk)))     ;; There better be at least 1 prime factor in the list
+          ] }
+
+  ;;
+  ;; Get prime facts for kk, should be a list even if there is only 1.
+  ;; Generate a new hash removing key kk since we have tested it for primality and we are increasing args so we will never see kk again
+  ;; ii gets the first prime factor in the list
+  ;;
   (loop [vv (get nonPrimeHash kk)
          newHash (dissoc nonPrimeHash kk)
          ii (first vv)]
 
-    (assert (not (empty? vv)))
-
     (let [rv (rest vv)
           nh (Insert newHash (+ kk ii) ii)]
-      ;;(println "\trv = " rv " nh = " nh )
       
       (if (empty? rv)
-        nh
+        nh  ;; no more prime factors for kk so return the new hash with kk "Expanded"
         (do
-          ;;(println "\trecur " rv " " nh " " (first rv))
           (recur rv nh (first rv))
-          )
-        )
-      )
-    )
-  )
+          )))))
+
               
     
-  
+;;
+;; Takes a candidate prime and a hashTable holding the relevant non-primes.
+;; Return the next prime >= firstCandidate and a new hash loaded with relevant non-primes.
+;;
 
 
-(defn GenPrimeCore [ firstCandidate nonPrimeHash ]
+(defn GenPrimeStep [ firstCandidate nonPrimeHash ]
   (loop [xx firstCandidate nph nonPrimeHash]
     (if (not (contains? nph xx))
-      (list xx (Insert nph (* xx xx) xx))
+      (lazy-seq (cons xx (GenPrimeStep (inc xx) (Insert nph (* xx xx) xx))))
       (recur (inc xx) (Expand nph xx))
       )
     )
   )
   
 
-
 (defn GenPrimes [countMax]
-  (loop [xx 2 nonPrimeHash { } cnt 1]
-    (if (<= cnt countMax)
-      (let [rList (GenPrimeCore xx nonPrimeHash)
-            vv (first rList)
-            nph (second rList)]
-        (println vv)
-        (assert CheckPrime vv)
-        (recur (inc vv) nph (inc cnt))
-        )
-      )
-    )
-  )
+  (take countMax (GenPrimeStep 2 {})))
+
 
 (defn RunTests []
   (let [retVal true]
@@ -188,4 +180,3 @@
     )
   )
     
-(Factors/GenPrimes 10001)
